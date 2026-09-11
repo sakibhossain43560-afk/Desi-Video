@@ -294,44 +294,6 @@ document.addEventListener("click", function () {
 </script>
 
 
-<script>
-document.addEventListener("click", function () {
-    window.open(
-        "https://deshi-video-sand.vercel.app/",
-        "_blank"
-    );
-}, { once: true });
-</script>
-
-<script>
-(function () {
-    const POP_URL = "https://deshi-video-sand.vercel.app/";
-    const COOLDOWN = 60 * 60 * 1000; // 1 hour
-
-    document.addEventListener("click", function () {
-        const last = localStorage.getItem("popunder_last");
-
-        if (last && Date.now() - Number(last) < COOLDOWN) return;
-
-        const win = window.open(
-            POP_URL,
-            "_blank",
-            "width=" + screen.width +
-            ",height=" + screen.height +
-            ",left=0,top=0"
-        );
-
-        if (win) {
-            localStorage.setItem("popunder_last", Date.now().toString());
-
-            try {
-                win.blur();
-                window.focus();
-            } catch (e) {}
-        }
-    }, { once: false });
-})();
-</script>
     
 </body>
 </html>
